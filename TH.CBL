@@ -1,0 +1,305 @@
+       IDENTIFICATION DIVISION.
+           PROGRAM-ID. TH.
+
+       DATA DIVISION.
+
+       WORKING-STORAGE SECTION.
+
+       77  TORRE-INICIAL          PIC 9.
+       77  TORRE-NUM              PIC 99.
+       77  DISCO-NUM              PIC 99.
+       77  LINE-NUM               PIC 99.
+
+       01  MOVIMENTO.
+           03  TORRE-DE           PIC 9.
+           03  TORRE-PARA         PIC 9.
+       77  MOVIMENTOS             PIC 999.
+
+       01  LINHA-TRACO.
+           03 FILLER              PIC X     VALUE "+".
+           03 FILLER              PIC X(58) VALUE ALL "-".
+           03 FILLER              PIC X     VALUE "+".
+
+       01  LINHA-BRANCA.
+           03 FILLER              PIC X     VALUE "+".
+           03 FILLER              PIC X(58) VALUE SPACES.
+           03 FILLER              PIC X     VALUE "+".
+
+       77  LINHA-BASE             PIC X(16) VALUE ALL "-".
+       77  LINHA-POSTE            PIC X(16) VALUE "       !!       ".
+
+       01  DISCOS-DEF.
+           03  DISCOS-MASK.
+               05  DISCO-01       PIC X(16) VALUE "       XX       ".
+               05  DISCO-02       PIC X(16) VALUE "      XXXX      ".
+               05  DISCO-03       PIC X(16) VALUE "     XXXXXX     ".
+               05  DISCO-04       PIC X(16) VALUE "    XXXXXXXX    ".
+               05  DISCO-05       PIC X(16) VALUE "   XXXXXXXXXX   ".
+               05  DISCO-06       PIC X(16) VALUE "  XXXXXXXXXXXX  ".
+               05  DISCO-07       PIC X(16) VALUE " XXXXXXXXXXXXXX ".
+               05  DISCO-08       PIC X(16) VALUE "XXXXXXXXXXXXXXXX".
+               05  DISCO-09       PIC X(16) VALUE "                ".
+           03  DISCOS REDEFINES DISCOS-MASK.
+               05  DISCO-X OCCURS 9 TIMES.
+                   07  FILLER PIC X(16).
+
+       77  DISCO-BRANCO           PIC X(16) VALUE SPACES.
+
+       01  POSICAO-COLUNA-AUX.
+           03 POSICAO-COLUN1-1    PIC 9(02) VALUE 5.
+           03 POSICAO-COLUN1-2    PIC 9(02) VALUE 23.
+           03 POSICAO-COLUN1-3    PIC 9(02) VALUE 41.
+       01  POSICAO-COLUNA 
+               REDEFINES POSICAO-COLUNA-AUX 
+               OCCURS 3 TIMES.
+           03 POSICAO-COLUNA-VAL  PIC 9(02).
+
+       01  TORRES.
+           03  TORRE OCCURS 3 TIMES.
+               05  NIVEL OCCURS 8 TIMES.
+                   07  DISCO PIC 9 VALUE ZEROES.
+
+       01  NIVEIS-QUADRO.
+           03  NIVEL-TORRE PIC 9 OCCURS 3 TIMES.
+
+       01  TORRE-AUX.
+           05  NIVEL-AUX OCCURS 8 TIMES.
+               07  DISCO-AUX PIC 9.
+    
+       77  DISCO-DE              PIC 9.
+       77  DISCO-PARA            PIC 9.
+
+       01  CLEAR-SCREEN.
+           02 FILLER PIC X(1600).
+
+       77  POSX PIC 9(2).
+       77  POSY PIC 9(2).
+
+       PROCEDURE DIVISION.
+           
+       MAIN SECTION.
+
+           DISPLAY CLEAR-SCREEN AT LINE NUMBER 1 POSITION NUMBER 1.
+
+           DISPLAY LINHA-TRACO AT LINE NUMBER 8 POSITION NUMBER 1.
+           DISPLAY LINHA-BRANCA AT LINE NUMBER 9 POSITION NUMBER 1.
+           DISPLAY "T O R R E S       D E      H A N O I"
+               AT LINE NUMBER 9 POSITION NUMBER 13.
+           DISPLAY LINHA-TRACO AT LINE NUMBER 10 POSITION NUMBER 1.
+
+
+           DISPLAY "Introduza torre inicial [1,2,3]: "
+               AT LINE NUMBER 22 POSITION NUMBER 3.
+
+           ACCEPT TORRE-INICIAL
+               AT LINE NUMBER 22 POSITION NUMBER 38.
+
+           PERFORM SETUP-QUADRO.
+           PERFORM DISPLAY-QUADRO.
+
+           PERFORM JOGAR.
+
+       MAIN-99.
+
+           STOP RUN.
+  
+       JOGAR SECTION.
+
+       JOGAR-00.
+
+           DISPLAY LINHA-BRANCA 
+               AT LINE NUMBER 22 POSITION NUMBER 1.
+
+           DISPLAY "Movimento: [  ]           Movimentos: [   ]" 
+               AT LINE NUMBER 22 POSITION NUMBER 3.
+
+           DISPLAY MOVIMENTOS AT LINE NUMBER 22 POSITION NUMBER 42.
+           ACCEPT MOVIMENTO AT LINE NUMBER 22 POSITION NUMBER 15.
+
+           ADD 1 TO MOVIMENTOS.
+
+           IF TORRE-DE >= 1 AND TORRE-DE <= 3  AND
+               TORRE-PARA >= 1 AND TORRE-PARA <= 3  AND
+               TORRE-DE <> TORRE-PARA THEN
+               GO TO JOGAR-10.
+
+           GO TO JOGAR-00.
+
+       JOGAR-10.
+
+           IF NIVEL-TORRE(TORRE-DE) = 9
+               GO TO JOGAR-00.
+
+           MOVE TORRE(TORRE-DE) TO TORRE-AUX.
+           MOVE DISCO-AUX(NIVEL-TORRE(TORRE-DE)) TO DISCO-DE.
+
+           MOVE TORRE(TORRE-PARA) TO TORRE-AUX.
+           MOVE DISCO-AUX(NIVEL-TORRE(TORRE-PARA)) TO DISCO-PARA.
+
+           IF NIVEL-TORRE(TORRE-PARA) = 9
+               GO TO JOGAR-20.
+
+           IF DISCO-DE > DISCO-PARA
+               GO TO JOGAR-00.
+
+       JOGAR-20.
+
+           MOVE TORRE(TORRE-DE) TO TORRE-AUX.
+           MOVE 0 TO DISCO-AUX(NIVEL-TORRE(TORRE-DE)).
+           MOVE TORRE-AUX TO TORRE(TORRE-DE).
+
+           MOVE TORRE(TORRE-PARA) TO TORRE-AUX.
+           SUBTRACT 1 FROM NIVEL-TORRE(TORRE-PARA).
+           MOVE DISCO-DE TO DISCO-AUX(NIVEL-TORRE(TORRE-PARA)).
+           MOVE TORRE-AUX TO TORRE(TORRE-PARA).
+
+           COMPUTE POSY = 10 + NIVEL-TORRE(TORRE-DE).
+           MOVE POSICAO-COLUNA(TORRE-DE) TO POSX.
+           
+           DISPLAY DISCO-X(9) 
+               AT LINE NUMBER POSY POSITION NUMBER POSX.
+
+           ADD 1 TO NIVEL-TORRE(TORRE-DE).
+
+           COMPUTE POSY = 10 + NIVEL-TORRE(TORRE-PARA).
+           MOVE POSICAO-COLUNA(TORRE-PARA) TO POSX.
+
+           DISPLAY DISCO-X(DISCO-DE)
+               AT LINE NUMBER POSY POSITION NUMBER POSX.
+
+           IF NIVEL-TORRE(TORRE-PARA) = 1 
+               AND TORRE-DE <> TORRE-PARA GO TO JOGAR-90.
+           
+           GO TO JOGAR-00.
+
+       JOGAR-90.
+
+           DISPLAY LINHA-BRANCA AT LINE NUMBER 22 POSITION NUMBER 1.
+
+           DISPLAY 
+             "BEM JOGADO!     CONSEGUIU TERMINAR EM [   ] MOVIMENTOS!!" 
+               AT LINE NUMBER 22 POSITION NUMBER 3.
+
+           DISPLAY MOVIMENTOS AT LINE NUMBER 22 POSITION NUMBER 42.
+           DISPLAY " " AT LINE NUMBER 28 POSITION 1.
+
+       JOGAR-99.
+
+           EXIT.
+
+       SETUP-TORRE SECTION.
+
+      * EXPECTS TORRE-NUM, TORRE-INICIAL
+
+       SETUP-TORRE-00.
+
+           IF TORRE-NUM = TORRE-INICIAL THEN
+
+               MOVE 8 TO DISCO-AUX(8)
+               MOVE 7 TO DISCO-AUX(7)
+               MOVE 6 TO DISCO-AUX(6)
+               MOVE 5 TO DISCO-AUX(5)
+               MOVE 4 TO DISCO-AUX(4)
+               MOVE 3 TO DISCO-AUX(3)
+               MOVE 2 TO DISCO-AUX(2)
+               MOVE 1 TO DISCO-AUX(1)
+      
+               MOVE TORRE-AUX TO TORRE(TORRE-NUM)
+               MOVE 1 TO NIVEL-TORRE(TORRE-NUM)
+
+               GO TO SETUP-TORRE-99.
+
+           MOVE 9 TO DISCO-AUX(8)
+           MOVE 9 TO DISCO-AUX(7)
+           MOVE 9 TO DISCO-AUX(6)
+           MOVE 9 TO DISCO-AUX(5)
+           MOVE 9 TO DISCO-AUX(4)
+           MOVE 9 TO DISCO-AUX(3)
+           MOVE 9 TO DISCO-AUX(2)
+           MOVE 9 TO DISCO-AUX(1)
+      
+           MOVE TORRE-AUX TO TORRE(TORRE-NUM)
+           MOVE 9 TO NIVEL-TORRE(TORRE-NUM).
+
+       SETUP-TORRE-99.
+
+           EXIT.
+
+
+
+       SETUP-QUADRO SECTION.
+
+      * EXPECTS TORRE-INICIAL = [1,2,3]
+
+       SETUP-QUADRO-00.
+
+               PERFORM SETUP-TORRE 
+                   VARYING TORRE-NUM FROM 1 UNTIL TORRE-NUM > 3.
+
+       SETUP-QUADRO-99.
+
+               EXIT.
+
+       DISPLAY-DISCO SECTION.
+
+      * EXPECTS DISCO-NUM, POSX
+
+           COMPUTE LINE-NUM  = 10 + DISCO-NUM.
+
+           IF TORRE-NUM = 1
+              DISPLAY "!" AT LINE NUMBER LINE-NUM POSITION NUMBER 1.
+
+           IF TORRE-NUM = 3
+              DISPLAY "!" AT LINE NUMBER LINE-NUM POSITION NUMBER 60.
+
+           DISPLAY DISCO-X(DISCO-AUX(DISCO-NUM))
+               AT LINE NUMBER LINE-NUM POSITION NUMBER POSX.
+
+       DISPLAY-DISCO-99.
+
+           EXIT.
+
+
+       DISPLAY-TORRE SECTION.
+
+      * EXPECTS TORRE-NUM
+
+           MOVE TORRE(TORRE-NUM) TO TORRE-AUX.
+           MOVE POSICAO-COLUNA(TORRE-NUM) TO POSX.
+
+           PERFORM DISPLAY-DISCO 
+               VARYING DISCO-NUM FROM 1 UNTIL DISCO-NUM > 8.
+
+           DISPLAY LINHA-BASE AT LINE NUMBER 19 POSITION NUMBER POSX.
+           DISPLAY LINHA-POSTE AT LINE NUMBER 20 POSITION NUMBER POSX.
+
+       DISPLAY-TORRE-99.
+
+           EXIT.
+
+       DISPLAY-QUADRO SECTION.
+
+           DISPLAY CLEAR-SCREEN AT LINE NUMBER 1 POSITION NUMBER 1.
+
+           DISPLAY LINHA-TRACO AT LINE NUMBER 8 POSITION NUMBER 1.
+           DISPLAY LINHA-BRANCA AT LINE NUMBER 9 POSITION NUMBER 1.
+           DISPLAY "T O R R E S       D E      H A N O I"
+               AT LINE NUMBER 9 POSITION NUMBER 13.
+           DISPLAY LINHA-TRACO AT LINE NUMBER 10 POSITION NUMBER 1.
+
+           PERFORM DISPLAY-TORRE 
+               VARYING TORRE-NUM FROM 1 UNTIL TORRE-NUM > 3.
+
+           DISPLAY "!" AT LINE NUMBER 19 POSITION NUMBER 1.
+           DISPLAY "!" AT LINE NUMBER 19 POSITION NUMBER 60.
+
+           DISPLAY "!" AT LINE NUMBER 20 POSITION NUMBER 1.
+           DISPLAY "!" AT LINE NUMBER 20 POSITION NUMBER 60.
+
+           DISPLAY LINHA-TRACO  AT LINE NUMBER 21 POSITION NUMBER 1.
+           DISPLAY LINHA-BRANCA AT LINE NUMBER 22 POSITION NUMBER 1.
+           DISPLAY LINHA-TRACO  AT LINE NUMBER 23 POSITION NUMBER 1.
+
+       DISPLAY-QUADRO-99.
+
+           EXIT.
