@@ -1,5 +1,7 @@
        IDENTIFICATION DIVISION.
            PROGRAM-ID. TH.
+           AUTHOR. DAVID PAIVA FERNANDES.
+           DATE. 2024-11-08.
 
        DATA DIVISION.
 
